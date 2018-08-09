@@ -1,0 +1,119 @@
+// DOCKER CONFIGURATION
+DOCKER_IMAGE = 'REQUIRED'
+
+// GIT CONFIGURATION
+GIT_URL         = 'REQUIRED'
+GIT_BRANCH      = ''
+GIT_TAG         = ''
+GIT_COMMIT      = ''
+GIT_UPDATE_SUBMODULES = true
+GIT_CLEAN_WORKSPACE = true
+
+// CREDENTIALS STORED IN JENKINS USED FOR THIS REPOSITORY
+GIT_CREDENTIALS = ''
+
+// GRADLE CONFIGURTAION
+GRADLE_TASK = 'REQUIRED'
+
+// DEPLOY OPTIONS
+DEPLOYMENT_JOB = ''
+
+// ARCHIVE ARTIFACTS
+ARCHIVE_INCLUDE = '**/*.apk'
+ARCHIVE_EXCLUDE = '**/*unaligned.apk, **/*Test*.apk'
+
+
+pipeline {
+    
+    agent {
+        docker { 
+            label 'adocker'
+            image "$DOCKER_IMAGE"
+            args '-u 0:0'
+            reuseNode true
+        }
+    }
+    
+    stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout(
+                    [$class: 'GitSCM', 
+                    branches: [[name: getBranchName()]], 
+                    doGenerateSubmoduleConfigurations: false, 
+                    extensions: [ getCheckoutExtensions() ], 
+                    submoduleCfg: [], 
+                    userRemoteConfigs: [ buildUserRemoteCfg() ]
+                ])
+
+            }
+        }
+        
+        stage('Build Project') {
+            steps {
+                echo "Perform Build"
+                sh "./gradlew $GRADLE_TASK"
+                archiveArtifacts artifacts: "$ARCHIVE_INCLUDE", excludes: "$ARCHIVE_EXCLUDE", fingerprint: true, onlyIfSuccessful: false
+
+            }
+        }
+        
+        stage('Test Project') {
+            steps {
+                echo "Perform Test Step"
+            }
+        }
+        
+        stage('Deploy Project') {
+            input {
+                message "Should we deploy the application?"
+                ok "Yes, we should."
+            }
+            
+            steps {
+                build job: "$DEPLOYMENT_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME")]
+            }
+        }
+    }
+    
+    // The options directive is for configuration that applies to the whole job.
+    options {
+        // And we'd really like to be sure that this build doesn't hang forever, so
+        // let's time it out after an hour.
+        timeout(time: 2, unit: 'DAYS')
+    }
+}
+
+def getCheckoutExtensions() {
+    def extensions = [:]
+    
+    if ("$GIT_UPDATE_SUBMODULES") {
+        extensions << [
+            $class: 'SubmoduleOption', 
+            disableSubmodules: false, 
+            parentCredentials: false, 
+            recursiveSubmodules: true, 
+            reference: '', 
+            trackingSubmodules: false]
+    }
+    return extensions
+}
+
+def buildUserRemoteCfg() {
+    def cfg = [url: "$GIT_URL"]
+    if ("$GIT_CREDENTIALS"?.trim()) {
+        cfg << [credentialsId: "$GIT_CREDENTIALS"]
+    }
+    return cfg
+}
+
+def getBranchName() {
+    if ("$GIT_TAG"?.trim()) {
+        return "ref/tags/$GIT_TAG"
+    } else if("$GIT_COMMIT"?.trim()) {
+        return "$GIT_COMMIT"
+    } else if("$GIT_BRANCH"?.trim()) {
+        return "$GIT_BRANCH"
+    }
+    return "master"
+}
