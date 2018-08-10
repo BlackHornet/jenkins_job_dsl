@@ -62,30 +62,22 @@ pipeline {
                 echo "Perform Test Step"
             }
         }
-        
-        stage('Deploy to Apperian') {
-            agent any
-            
-            steps {
-                build job: "$DEPLOYMENT_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME")]
-            }
-        }
-            
-        stage('Promote for Deployment to Google Play') {
-            agent any
-            steps {
-                build job: "$PROMOTION_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME")]
-            }
-        }
-        
-        stage('Deploy Project') {
-            input {
-                message "Should we deploy the application?"
-                ok "Yes, we should."
-            }
-            
-            steps {
-                build job: "$DEPLOYMENT_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME")]
+        stage('Deployment') {
+            parallel {
+                stage('Deploy to Apperian') {
+                    agent any
+
+                    steps {
+                        build job: "$DEPLOYMENT_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME")]
+                    }
+                }
+
+                stage('Promote for Deployment to Google Play') {
+                    agent any
+                    steps {
+                        build job: "$PROMOTION_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME")]
+                    }
+                }
             }
         }
     }
