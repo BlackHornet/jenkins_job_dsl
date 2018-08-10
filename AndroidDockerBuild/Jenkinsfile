@@ -68,14 +68,14 @@ pipeline {
                     agent any
 
                     steps {
-                        build job: "$DEPLOYMENT_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME")]
+                        build job: "$DEPLOYMENT_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME"), string(name: 'BUILD_NUMBER', value: "$BUILD_NUMBER")]
                     }
                 }
 
                 stage('Promote for Deployment to Google Play') {
                     agent any
                     steps {
-                        build job: "$PROMOTION_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME")]
+                        build job: "$PROMOTION_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME"), string(name: 'BUILD_NUMBER', value: "$BUILD_NUMBER")]
                     }
                 }
             }
