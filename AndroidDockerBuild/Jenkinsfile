@@ -1,16 +1,22 @@
 pipeline {
-    
-    agent {
-        docker { 
-            label 'adocker'
-            image "$DOCKER_IMAGE"
-            args '-u 0:0'
-            reuseNode true
-        }
-    }
+    agent none
     
     stages {
         stage('Checkout SCM') {
+            agent {
+                docker { 
+                    label 'adocker'
+                    image "$DOCKER_IMAGE"
+                    args '-u 0:0'
+                    reuseNode true
+                }
+            }
+            when {
+                expression {
+                    return !(SKIP_CHECKOUT)
+                }
+            }
+            
             steps {
                 checkout(
                     [$class: 'GitSCM', 
@@ -25,6 +31,15 @@ pipeline {
         }
         
         stage('Build Project') {
+            agent {
+                docker { 
+                    label 'adocker'
+                    image "$DOCKER_IMAGE"
+                    args '-u 0:0'
+                    reuseNode true
+                }
+            }
+            
             steps {
                 echo "Perform Build"
                 sh "./gradlew $GRADLE_TASK"
@@ -34,8 +49,32 @@ pipeline {
         }
         
         stage('Test Project') {
+            agent {
+                docker { 
+                    label 'adocker'
+                    image "$DOCKER_IMAGE"
+                    args '-u 0:0'
+                    reuseNode true
+                }
+            }
+            
             steps {
                 echo "Perform Test Step"
+            }
+        }
+        
+        stage('Deploy to Apperian') {
+            agent any
+            
+            steps {
+                build job: "$DEPLOYMENT_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME")]
+            }
+        }
+            
+        stage('Promote for Deployment to Google Play') {
+            agent any
+            steps {
+                build job: "$PROMOTION_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME")]
             }
         }
         
