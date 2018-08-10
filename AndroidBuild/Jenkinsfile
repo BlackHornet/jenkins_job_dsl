@@ -4,12 +4,7 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             agent {
-                docker { 
-                    label "$AGENT_NODE"
-                    image "$DOCKER_IMAGE"
-                    args '-u 0:0'
-                    reuseNode true
-                }
+                label "$AGENT_NODE"
             }
             when {
                 expression {
@@ -32,12 +27,7 @@ pipeline {
         
         stage('Build Project') {
             agent {
-                docker { 
-                    label "$AGENT_NODE"
-                    image "$DOCKER_IMAGE"
-                    args '-u 0:0'
-                    reuseNode true
-                }
+                label "$AGENT_NODE"
             }
             
             steps {
@@ -50,18 +40,14 @@ pipeline {
         
         stage('Test Project') {
             agent {
-                docker { 
-                    label "$AGENT_NODE"
-                    image "$DOCKER_IMAGE"
-                    args '-u 0:0'
-                    reuseNode true
-                }
+                label "$AGENT_NODE"
             }
             
             steps {
                 echo "Perform Test Step"
             }
         }
+
         stage('Deployment') {
             parallel {
                 stage('Deploy to Apperian') {
