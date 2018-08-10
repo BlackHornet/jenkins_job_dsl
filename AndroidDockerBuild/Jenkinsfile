@@ -60,9 +60,11 @@ pipeline {
             
             steps {
                 echo "Perform Test Step"
+                sh "./gradlew test"
             }
         }
-        stage('Deployment') {
+
+        stage('Schedule Deployment') {
             parallel {
                 stage('Deploy to Apperian') {
                     agent any
@@ -72,7 +74,7 @@ pipeline {
                     }
                 }
 
-                stage('Promote for Deployment to Google Play') {
+                stage('Request Promotion for Google Play Publishing') {
                     agent any
 
                     steps {

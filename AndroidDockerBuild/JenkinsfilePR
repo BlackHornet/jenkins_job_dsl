@@ -4,7 +4,12 @@ pipeline {
     stages {
         stage('Checkout SCM') {
             agent {
-                label "$AGENT_NODE"
+                docker { 
+                    label "$AGENT_NODE"
+                    image "$DOCKER_IMAGE"
+                    args '-u 0:0'
+                    reuseNode true
+                }
             }
             when {
                 expression {
@@ -13,9 +18,11 @@ pipeline {
             }
             
             steps {
+                gitHubPRStatus githubPRMessage('${GITHUB_PR_COND_REF} run started')
+
                 checkout(
                     [$class: 'GitSCM', 
-                    branches: [[name: getBranchName()]], 
+                    branches: [[name: '${GITHUB_PR_HEAD_SHA}']], 
                     doGenerateSubmoduleConfigurations: false, 
                     extensions: [ getCheckoutExtensions() ], 
                     submoduleCfg: [], 
@@ -25,46 +32,53 @@ pipeline {
             }
         }
         
-        stage('Build Project') {
+        stage('Build Pull Request') {
             agent {
-                label "$AGENT_NODE"
+                docker { 
+                    label "$AGENT_NODE"
+                    image "$DOCKER_IMAGE"
+                    args '-u 0:0'
+                    reuseNode true
+                }
             }
             
             steps {
                 echo "Perform Build"
                 sh "./gradlew $GRADLE_TASK"
-                archiveArtifacts artifacts: "$ARCHIVE_INCLUDE", excludes: "$ARCHIVE_EXCLUDE", fingerprint: true, onlyIfSuccessful: false
 
+            }
+            
+            post {
+                success {
+                    setGitHubPullRequestStatus context: "${JOB_BASE_NAME} - Build", message: 'Build succeeded', state: 'SUCCESS'
+                }
+                failure {
+                    setGitHubPullRequestStatus context: "${JOB_BASE_NAME} - Build", message: 'Build failed', state: 'FAILURE'
+                }
             }
         }
         
-        stage('Test Project') {
+        stage('Test Pull Request') {
             agent {
-                label "$AGENT_NODE"
+                docker { 
+                    label "$AGENT_NODE"
+                    image "$DOCKER_IMAGE"
+                    args '-u 0:0'
+                    reuseNode true
+                }
             }
             
             steps {
                 echo "Perform Test Step"
                 sh "./gradlew test"
             }
-        }
-
-        stage('Schedule Deployment') {
-            parallel {
-                stage('Deploy to Apperian') {
-                    agent any
-
-                    steps {
-                        build job: "$DEPLOYMENT_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME"), string(name: 'SOURCE_BUILD_NUMBER', value: "$BUILD_NUMBER")]
-                    }
+            
+            post {
+                success {
+                    setGitHubPullRequestStatus context: "${JOB_BASE_NAME} - Test", message: 'Tests succeeded', state: 'SUCCESS'
                 }
-
-                stage('Request Promotion for Google Play Publishing') {
-                    agent any
-
-                    steps {
-                        build job: "$PROMOTION_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME"), string(name: 'SOURCE_BUILD_NUMBER', value: "$BUILD_NUMBER")]
-                    }
+                failure {
+                    setGitHubPullRequestStatus context: "${JOB_BASE_NAME} - Test", message: 'Tests failed', state: 'FAILURE'
                 }
             }
         }
@@ -92,15 +106,4 @@ def buildUserRemoteCfg() {
         cfg << [credentialsId: "$GIT_CREDENTIALS"]
     }
     return cfg
-}
-
-def getBranchName() {
-    if ("$GIT_TAG"?.trim()) {
-        return "ref/tags/$GIT_TAG"
-    } else if("$GIT_COMMIT"?.trim()) {
-        return "$GIT_COMMIT"
-    } else if("$GIT_BRANCH"?.trim()) {
-        return "$GIT_BRANCH"
-    }
-    return "master"
 }
