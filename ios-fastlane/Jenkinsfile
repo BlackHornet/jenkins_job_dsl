@@ -1,0 +1,105 @@
+pipeline {
+    agent none
+    
+    stages {
+        stage('Checkout SCM') {
+            agent {
+                label "$AGENT_NODE"
+            }
+            when {
+                expression {
+                    return (SKIP_CHECKOUT == "false")
+                }
+            }
+            
+            steps {
+                checkout(
+                    [$class: 'GitSCM', 
+                    branches: [[name: getBranchName()]], 
+                    doGenerateSubmoduleConfigurations: false, 
+                    extensions: [ getCheckoutExtensions() ], 
+                    submoduleCfg: [], 
+                    userRemoteConfigs: [ buildUserRemoteCfg() ]
+                ])
+
+            }
+        }
+        
+        stage('Run Fastlane configuration') {
+            agent {
+                label "$AGENT_NODE"
+            }
+            
+            steps {
+                echo "Perform Build"
+                sh "fastlane $FASTLANE_LANE"
+                archiveArtifacts artifacts: "$ARCHIVE_INCLUDE", fingerprint: true, onlyIfSuccessful: false
+
+            }
+        }
+        
+        stage('Test Project') {
+            agent {
+                label "$AGENT_NODE"
+            }
+            
+            steps {
+                echo "Perform Test Step"
+            }
+        }
+
+        stage('Schedule Deployment') {
+            parallel {
+                stage('Deploy to Apperian') {
+                    agent any
+
+                    steps {
+                        build job: "$DEPLOYMENT_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME"), string(name: 'SOURCE_BUILD_NUMBER', value: "$BUILD_NUMBER")]
+                    }
+                }
+
+                stage('Request Promotion for Google Play Publishing') {
+                    agent any
+
+                    steps {
+                        build job: "$PROMOTION_JOB", parameters: [string(name: 'SOURCE_PROJECT', value: "$JOB_NAME"), string(name: 'SOURCE_BUILD_NUMBER', value: "$BUILD_NUMBER")]
+                    }
+                }
+            }
+        }
+    }
+}
+
+def getCheckoutExtensions() {
+    def extensions = [:]
+    
+    if ("$GIT_UPDATE_SUBMODULES") {
+        extensions << [
+            $class: 'SubmoduleOption', 
+            disableSubmodules: false, 
+            parentCredentials: false, 
+            recursiveSubmodules: true, 
+            reference: '', 
+            trackingSubmodules: false]
+    }
+    return extensions
+}
+
+def buildUserRemoteCfg() {
+    def cfg = [url: "$GIT_URL"]
+    if ("$GIT_CREDENTIALS"?.trim()) {
+        cfg << [credentialsId: "$GIT_CREDENTIALS"]
+    }
+    return cfg
+}
+
+def getBranchName() {
+    if ("$GIT_TAG"?.trim()) {
+        return "ref/tags/$GIT_TAG"
+    } else if("$GIT_COMMIT"?.trim()) {
+        return "$GIT_COMMIT"
+    } else if("$GIT_BRANCH"?.trim()) {
+        return "$GIT_BRANCH"
+    }
+    return "master"
+}

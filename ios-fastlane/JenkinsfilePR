@@ -1,0 +1,103 @@
+pipeline {
+    agent none
+    
+    stages {
+        stage('Checkout SCM') {
+            agent {
+                label "$AGENT_NODE"
+            }
+
+            when {
+                expression {
+                    return (SKIP_CHECKOUT == "false")
+                }
+            }
+            
+            steps {
+                gitHubPRStatus githubPRMessage('${GITHUB_PR_COND_REF} run started')
+
+                checkout(
+                    [$class: 'GitSCM', 
+                    branches: [[name: '${GITHUB_PR_HEAD_SHA}']], 
+                    doGenerateSubmoduleConfigurations: false, 
+                    extensions: [ getCheckoutExtensions() ], 
+                    submoduleCfg: [], 
+                    userRemoteConfigs: [ buildUserRemoteCfg() ]
+                ])
+
+            }
+        }
+        
+        stage('Run Fastlane Pull Request') {
+            agent {
+                label "$AGENT_NODE"
+            }
+            
+            steps {
+                echo "Perform Build"
+                sh "fastlane $FASTLANE_LANE"
+
+            }
+            
+            post {
+                success {
+                    setGitHubPullRequestStatus context: "${JOB_BASE_NAME} - Build", message: 'Build succeeded', state: 'SUCCESS'
+                }
+                failure {
+                    setGitHubPullRequestStatus context: "${JOB_BASE_NAME} - Build", message: 'Build failed', state: 'FAILURE'
+                }
+            }
+        }
+        
+        stage('Test Pull Request') {
+            agent {
+                label "$AGENT_NODE"
+            }
+            
+            steps {
+                echo "Perform Test Step"
+            }
+            
+            post {
+                success {
+                    setGitHubPullRequestStatus context: "${JOB_BASE_NAME} - Test", message: 'Tests succeeded', state: 'SUCCESS'
+                }
+                failure {
+                    setGitHubPullRequestStatus context: "${JOB_BASE_NAME} - Test", message: 'Tests failed', state: 'FAILURE'
+                }
+            }
+        }
+    }
+    
+    post {
+        success {
+            setGitHubPullRequestStatus context: "${JOB_BASE_NAME}", message: 'Pull-Request build succeeded', state: 'SUCCESS'
+        }
+        failure {
+            setGitHubPullRequestStatus context: "${JOB_BASE_NAME}", message: 'Pull-Request build failed', state: 'FAILURE'
+        }
+    }
+}
+
+def getCheckoutExtensions() {
+    def extensions = [:]
+    
+    if ("$GIT_UPDATE_SUBMODULES") {
+        extensions << [
+            $class: 'SubmoduleOption', 
+            disableSubmodules: false, 
+            parentCredentials: false, 
+            recursiveSubmodules: true, 
+            reference: '', 
+            trackingSubmodules: false]
+    }
+    return extensions
+}
+
+def buildUserRemoteCfg() {
+    def cfg = [url: "$GIT_URL"]
+    if ("$GIT_CREDENTIALS"?.trim()) {
+        cfg << [credentialsId: "$GIT_CREDENTIALS"]
+    }
+    return cfg
+}
