@@ -58,7 +58,7 @@ pipeline {
                     }
                 }
 
-                stage('Request Promotion for Google Play Publishing') {
+                stage('Request Promotion for Apple AppStore Publishing') {
                     agent any
 
                     steps {
