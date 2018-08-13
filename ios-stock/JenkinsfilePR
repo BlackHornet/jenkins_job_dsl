@@ -95,7 +95,7 @@ def getCheckoutExtensions() {
 }
 
 def buildUserRemoteCfg() {
-    def cfg = [url: "$GIT_URL"]
+    def cfg = [url: "$GIT_REPOSITORY"]
     if ("$GIT_CREDENTIALS"?.trim()) {
         cfg << [credentialsId: "$GIT_CREDENTIALS"]
     }
