@@ -108,13 +108,13 @@ freeStyleJob(jobPublishing) {
     steps {
         copyArtifacts('$SOURCE_PROJECT') {
             flatten()
-            targetDirectory('')
+            targetDirectory('$SOURCE_BUILD_NUMBER')
             fingerprintArtifacts(true)
             buildSelector {
                 buildNumber('$SOURCE_BUILD_NUMBER')
             }
         }
-        shell('"/Applications/Xcode.app/Contents/Applications/Application Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Support/altool" --validate-app -f "$WORKSPACE/$BUILD_NUMBER/Application.ipa" -u $ITUNES_USERNAME -p $ITUNES_PASSWORD')
+        shell('"/Applications/Xcode.app/Contents/Applications/Application Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Support/altool" --validate-app -f "$WORKSPACE/$SOURCE_BUILD_NUMBER/Application.ipa" -u $ITUNES_USERNAME -p $ITUNES_PASSWORD')
     }
 }
 
@@ -129,7 +129,7 @@ freeStyleJob(jobDeployment) {
     steps {
         copyArtifacts('$SOURCE_PROJECT') {
             flatten()
-            targetDirectory('')
+            targetDirectory('$SOURCE_BUILD_NUMBER')
             fingerprintArtifacts(true)
             buildSelector {
                 buildNumber('$SOURCE_BUILD_NUMBER')
