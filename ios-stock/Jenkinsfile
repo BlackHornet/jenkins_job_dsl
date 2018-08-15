@@ -32,37 +32,21 @@ pipeline {
             
             steps {
                 echo "Perform Build"
-                xcodeBuild appURL: '', 
-                    assetPackManifestURL: '', 
-                    buildDir: '', 
-                    buildIpa: false, 
-                    bundleID: '', 
-                    bundleIDInfoPlistPath: '', 
-                    cfBundleShortVersionStringValue: '', 
-                    cfBundleVersionValue: '', 
-                    cleanBeforeBuild: false, 
+                xcodeBuild(
+                    buildIpa: true, 
+                    cleanBeforeBuild: true, 
                     configuration: "$XCODE_CONFIGURATION", 
-                    developmentTeamID: '', 
-                    developmentTeamName: '', 
-                    displayImageURL: '', 
-                    fullSizeImageURL: '', 
-                    ipaExportMethod: 'ad-hoc',
-                    ipaName: '', 
-                    ipaOutputDirectory: '', 
-                    keychainName: '', 
-                    keychainPath: '', 
-                    keychainPwd: '', 
-                    logfileOutputDirectory: '', 
-                    provisioningProfiles: [[provisioningProfileAppId: '', provisioningProfileUUID: '']], 
-                    sdk: '', 
-                    symRoot: '', 
+                    developmentTeamID: "$DEVELOPMENT_TEAMID", 
+                    ipaExportMethod: "$IPA_EXPORT_METHOD",
+                    ipaName: 'Application.ipa', 
+                    keychainName: "$KEYCHAIN_NAME", 
+                    unlockKeychain: true,
+                    provisioningProfiles: [[provisioningProfileAppId: "$PROVISIONING_PROFILE_APPID", provisioningProfileUUID: "$PROVISIONING_PROFILE_UUID"]], 
+                    manualSigning: true,
                     target: "$XCODE_TARGET", 
-                    thinning: '', 
-                    xcodeProjectFile: '', 
-                    xcodeProjectPath: '', 
-                    xcodeSchema: '', 
-                    xcodeWorkspaceFile: '', 
-                    xcodebuildArguments: ''
+                    xcodeProjectPath: "$PROJECT_PATH", 
+                    xcodeSchema: "$XCODE_SCHEMA"
+                )
 
                 archiveArtifacts artifacts: "$ARCHIVE_INCLUDE", fingerprint: true, onlyIfSuccessful: false
 
