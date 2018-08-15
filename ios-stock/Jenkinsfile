@@ -25,7 +25,7 @@ pipeline {
             }
         }
         
-        stage('Run Fastlane configuration') {
+        stage('Build project') {
             agent {
                 label "$AGENT_NODE"
             }
@@ -38,7 +38,7 @@ pipeline {
                     configuration: "$XCODE_CONFIGURATION", 
                     developmentTeamID: "$DEVELOPMENT_TEAMID", 
                     ipaExportMethod: "$IPA_EXPORT_METHOD",
-                    ipaName: 'Application.ipa', 
+                    ipaName: 'Application', 
                     keychainName: "$KEYCHAIN_NAME", 
                     unlockKeychain: true,
                     provisioningProfiles: [[provisioningProfileAppId: "$PROVISIONING_PROFILE_APPID", provisioningProfileUUID: "$PROVISIONING_PROFILE_UUID"]], 

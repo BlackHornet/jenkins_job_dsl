@@ -58,23 +58,23 @@ freeStyleJob(jobPromotion) {
     properties{
     promotions{
       promotion {
-                name('Deploy to Apple')
-                icon('star-gold')
-                conditions {
-                    manual('')
-                }
-              
-                actions {
-          downstreamParameterized {
-                      trigger(jobPublishing) {
-                          parameters {
-              predefinedProp("SOURCE_PROJECT", '$SOURCE_PROJECT')
-              predefinedProp("SOURCE_BUILD_NUMBER", '$SOURCE_BUILD_NUMBER')
-                          }
-                      }
+            name('Deploy to Apple')
+            icon('star-gold')
+            conditions {
+                manual('')
+            }
+          
+            actions {
+                downstreamParameterized {
+                    trigger(jobPublishing) {
+                        parameters {
+                            predefinedProp("SOURCE_PROJECT", '$SOURCE_PROJECT')
+                            predefinedProp("SOURCE_BUILD_NUMBER", '$SOURCE_BUILD_NUMBER')
+                        }
                     }
                 }
             }
+        }
     }
   }
   
@@ -108,13 +108,13 @@ freeStyleJob(jobPublishing) {
     steps {
         copyArtifacts('$SOURCE_PROJECT') {
             flatten()
+            targetDirectory('')
             fingerprintArtifacts(true)
             buildSelector {
                 buildNumber('$SOURCE_BUILD_NUMBER')
             }
         }
-        shell('cd /Applications/Xcode.app/Contents/Applications/Application\ Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Support/')
-        shell('./altool --validate-app -f "*.ipa" -u $ITUNES_USERNAME -p $ITUNES_PASSWORD')
+        shell('"/Applications/Xcode.app/Contents/Applications/Application Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Support/altool" --validate-app -f "$WORKSPACE/$BUILD_NUMBER/Application.ipa" -u $ITUNES_USERNAME -p $ITUNES_PASSWORD')
     }
 }
 
@@ -129,6 +129,7 @@ freeStyleJob(jobDeployment) {
     steps {
         copyArtifacts('$SOURCE_PROJECT') {
             flatten()
+            targetDirectory('')
             fingerprintArtifacts(true)
             buildSelector {
                 buildNumber('$SOURCE_BUILD_NUMBER')
@@ -164,6 +165,8 @@ pipelineJob(jobPrefix + "_Build") {
 
         stringParam('XCODE_SCHEMA', XCODE_SCHEMA, '')
         stringParam('PROJECT_PATH', PROJECT_PATH, '')
+        stringParam('XCODE_CONFIGURATION', XCODE_CONFIGURATION, '')
+        stringParam('XCODE_TARGET', XCODE_TARGET, '')
         stringParam('DEVELOPMENT_TEAMID', DEVELOPMENT_TEAMID, '')
         stringParam('IPA_EXPORT_METHOD', IPA_EXPORT_METHOD, '')
         stringParam('KEYCHAIN_NAME', KEYCHAIN_NAME, '')
