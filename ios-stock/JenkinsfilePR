@@ -28,14 +28,25 @@ pipeline {
             }
         }
         
-        stage('Run Fastlane Pull Request') {
+        stage('Build Project Pull Request') {
             agent {
                 label "$AGENT_NODE"
             }
             
             steps {
                 echo "Perform Build"
-                sh "fastlane $FASTLANE_LANE"
+                xcodeBuild(
+                    buildIpa: false, 
+                    cleanBeforeBuild: true, 
+                    configuration: "$XCODE_CONFIGURATION", 
+                    developmentTeamID: "$DEVELOPMENT_TEAMID", 
+                    keychainName: "$KEYCHAIN_NAME", 
+                    unlockKeychain: true,
+                    provisioningProfiles: [[provisioningProfileAppId: "$PROVISIONING_PROFILE_APPID", provisioningProfileUUID: "$PROVISIONING_PROFILE_UUID"]], 
+                    manualSigning: true,
+                    target: "$XCODE_TARGET", 
+                    xcodeProjectPath: "$PROJECT_PATH"
+                )
 
             }
             

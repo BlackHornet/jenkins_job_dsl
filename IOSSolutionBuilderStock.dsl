@@ -201,6 +201,14 @@ pipelineJob(jobDevPR) {
         }
         booleanParam('GIT_UPDATE_SUBMODULES', (GIT_UPDATE_SUBMODULES == 'true'), '')
         booleanParam('IS_PR_BUILD', true, '')
+
+        stringParam('PROJECT_PATH', PROJECT_PATH, '')
+        stringParam('XCODE_CONFIGURATION', XCODE_CONFIGURATION, '')
+        stringParam('XCODE_TARGET', XCODE_TARGET, '')
+        stringParam('DEVELOPMENT_TEAMID', DEVELOPMENT_TEAMID, '')
+        stringParam('KEYCHAIN_NAME', KEYCHAIN_NAME, '')
+        stringParam('PROVISIONING_PROFILE_APPID', PROVISIONING_PROFILE_APPID, '')
+        stringParam('PROVISIONING_PROFILE_UUID', PROVISIONING_PROFILE_UUID, '')
     }
   
     properties {
