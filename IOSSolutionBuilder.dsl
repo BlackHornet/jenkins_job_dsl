@@ -9,11 +9,11 @@ def AGENT_NODE = nodeParameterMap[BUILD_STACK]
 def jobPrefix = "$SOLUTION_NAME" + "/" + "$SOLUTION_NAME"
 
 def jobDashboard = "$SOLUTION_NAME" + "/" + "Dashboard"
-def jobBuild = jobPrefix + "_Build"
-def jobDevPR = jobPrefix + "_DevPR"
-def jobDeployment = jobPrefix + "_QA"
-def jobPromotion = jobPrefix + "_QA_Promotion"
-def jobPublishing = jobPrefix + "_Publish"
+def jobDevPR = "1_" + jobPrefix + "_DevPR"
+def jobBuild = "2_" + jobPrefix + "_Build"
+def jobDeployment = "3A_" + jobPrefix + "_QA"
+def jobPromotion = "3B_" + jobPrefix + "_QA_Promotion"
+def jobPublishing = "4_" + jobPrefix + "_Publish"
 
 
 folder("$SOLUTION_NAME") {
