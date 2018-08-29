@@ -18,8 +18,14 @@ def jobPublishing = "$SOLUTION_NAME" + "/" + "4_Publish"
 
 
 folder("$SOLUTION_NAME") {
-  displayName("$SOLUTION_NAME")
-  description("Folder for $SOLUTION_NAME")
+    displayName("$SOLUTION_NAME")
+    description("Folder for $SOLUTION_NAME")
+
+    if (AUTHORIZATION_ID.trim() != '') {
+        authorization {
+            permissionAll(AUTHORIZATION_ID)
+        }
+    }
 }
 
 // create Dashboard overview
