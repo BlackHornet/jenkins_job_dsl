@@ -63,6 +63,7 @@ freeStyleJob(jobPromotion) {
                 icon('star-gold')
                 conditions {
                     manual('')
+                    downstream(false, '$SOURCE_PROJECT')
                 }
               
                 actions {
