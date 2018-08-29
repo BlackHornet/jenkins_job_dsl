@@ -47,9 +47,14 @@ pipeline {
                     xcodeProjectPath: "$PROJECT_PATH", 
                     xcodeSchema: "$XCODE_SCHEMA"
                 )
-
-                archiveArtifacts artifacts: "$ARCHIVE_INCLUDE", fingerprint: true, onlyIfSuccessful: false
-
+            }
+            
+            post {
+                success {
+                    script {
+                        archiveArtifacts artifacts: "$ARCHIVE_INCLUDE", fingerprint: true, onlyIfSuccessful: false
+                    }
+                }
             }
         }
         

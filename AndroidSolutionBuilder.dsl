@@ -24,17 +24,17 @@ folder("$SOLUTION_NAME") {
 
 // create Dashboard overview
 dashboardView(jobDashboard) {
-  	jobs {
+    jobs {
         regex(/.*/)
     }
   
     columns {
         status()
         weather()
-      	name()
-      	lastSuccess()
-      	lastFailure()
-      	lastDuration()
+        name()
+        lastSuccess()
+        lastFailure()
+        lastDuration()
         buildButton()
     }
   
@@ -50,16 +50,16 @@ dashboardView(jobDashboard) {
 
 // create QA_Promotion Job
 freeStyleJob(jobPromotion) {
-  	
+    
     parameters {
         stringParam('SOURCE_PROJECT', '', '')
-      	stringParam('SOURCE_BUILD_NUMBER', '', '')
+        stringParam('SOURCE_BUILD_NUMBER', '', '')
         stringParam('PROMOTION_RECEIPIENTS', PROMOTION_RECEIPIENTS, '')
     }
 
-  	properties{
-		    promotions{
-			      promotion {
+    properties{
+        promotions{
+            promotion {
                 name('Deploy to Google')
                 icon('star-gold')
                 conditions {
@@ -77,11 +77,11 @@ freeStyleJob(jobPromotion) {
                     }
                 }
             }
-		    }
-	  }
+        }
+    }
   
     steps {
-      	shell('echo "INFORM ABOUT NEW BUILD - awaiting promotion!"')
+        shell('echo "INFORM ABOUT NEW BUILD - awaiting promotion!"')
         shell('echo "SEND EMAIL"')
         shell('echo "CREATE JIRA ISSUE"')
     }  
@@ -106,11 +106,11 @@ freeStyleJob(jobPromotion) {
 
 // create Publish Job
 freeStyleJob(jobPublishing) {
-  	description("<h2>Be aware to configure the Post-build Action: Upload Android APK to Google Play Step.</h2>Job configuration (Recent Changes) might be updated whenever a build is about to be promoted.")
+    description("<h2>Be aware to configure the Post-build Action: Upload Android APK to Google Play Step.</h2>Job configuration (Recent Changes) might be updated whenever a build is about to be promoted.")
   
     parameters {
         stringParam('SOURCE_PROJECT', '', '')
-      	stringParam('SOURCE_BUILD_NUMBER', '', '')
+        stringParam('SOURCE_BUILD_NUMBER', '', '')
     }
 
     steps {
@@ -125,20 +125,20 @@ freeStyleJob(jobPublishing) {
     }
   
     publishers {
-    	androidApkUpload {
-          	apkFilesPattern("**/*.apk")
+      androidApkUpload {
+            apkFilesPattern("**/*.apk")
             deobfuscationFilesPattern("**/mapping.txt")
-          	googleCredentialsId("$GOOGLE_SERVICE_ACCOUNT")
+            googleCredentialsId("$GOOGLE_SERVICE_ACCOUNT")
         }
     }
 }
 
 // create QA Job
 freeStyleJob(jobDeployment) {
-  	description("<h2>Be aware to configure the Post-build Action: Apperian EASE Plugin Step</h2>")
+    description("<h2>Be aware to configure the Post-build Action: Apperian EASE Plugin Step</h2>")
     parameters {
         stringParam('SOURCE_PROJECT', '', '')
-      	stringParam('SOURCE_BUILD_NUMBER', '', '')
+        stringParam('SOURCE_BUILD_NUMBER', '', '')
     }
 
     steps {
@@ -152,11 +152,11 @@ freeStyleJob(jobDeployment) {
         }
     }
 
-	// Base Init of Apperian Publishing
+  // Base Init of Apperian Publishing
     configure { project ->
         project / publishers << 'org.jenkinsci.plugins.ease.EaseRecorder' {
             uploads {
-                org.jenkinsci.plugins.ease.EaseUpload {
+                'org.jenkinsci.plugins.ease.EaseUpload' {
                     versionNotes('Build #$SOURCE_BUILD_NUMBER at $BUILD_TIMESTAMP')
                 }
             }
@@ -166,15 +166,15 @@ freeStyleJob(jobDeployment) {
 
 // create Build Job
 pipelineJob(jobBuild) {
-  	parameters {
+    parameters {
         stringParam('AGENT_NODE', AGENT_NODE, '')
-      	stringParam('DOCKER_IMAGE', DOCKER_IMAGE, '')
+        stringParam('DOCKER_IMAGE', DOCKER_IMAGE, '')
         booleanParam('SKIP_CHECKOUT', (SKIP_CHECKOUT == 'true'), '')
-      	stringParam('GIT_REPOSITORY', GIT_REPOSITORY, '')
+        stringParam('GIT_REPOSITORY', GIT_REPOSITORY, '')
         credentialsParam('GIT_CREDENTIALS') {
           defaultValue(GIT_CREDENTIALS)
         }
-      	booleanParam('GIT_UPDATE_SUBMODULES', (GIT_UPDATE_SUBMODULES == 'true'), '')
+        booleanParam('GIT_UPDATE_SUBMODULES', (GIT_UPDATE_SUBMODULES == 'true'), '')
         stringParam('GIT_BRANCH', GIT_BRANCH, '')
         stringParam('GIT_TAG', GIT_TAG, '')
         stringParam('GIT_COMMIT', GIT_COMMIT_SHA, '')
@@ -183,11 +183,11 @@ pipelineJob(jobBuild) {
         stringParam('ARCHIVE_EXCLUDE', ARCHIVE_EXCLUDE, '')
         stringParam('DEPLOYMENT_JOB', jobDeployment, '')
         stringParam('PROMOTION_JOB', jobPromotion, '')
-      	booleanParam('IS_PR_BUILD', false, '')
+        booleanParam('IS_PR_BUILD', false, '')
     }
   
     properties {
-      	// allow any project in this folder being able to copy artifacts from Build job
+        // allow any project in this folder being able to copy artifacts from Build job
         copyArtifactPermission {
             // Comma-separated list of projects that can copy artifacts of this project.
             projectNames("$SOLUTION_NAME" + ".*")
@@ -208,38 +208,38 @@ pipelineJob(jobBuild) {
 
 // create Dev_PR Job
 pipelineJob(jobDevPR) {
-  	parameters {
+    parameters {
         stringParam('AGENT_NODE', AGENT_NODE, '')
-      	stringParam('DOCKER_IMAGE', DOCKER_IMAGE, '')
+        stringParam('DOCKER_IMAGE', DOCKER_IMAGE, '')
         booleanParam('SKIP_CHECKOUT', (SKIP_CHECKOUT == 'true'), '')
-      	stringParam('GIT_REPOSITORY', GIT_REPOSITORY, '')
+        stringParam('GIT_REPOSITORY', GIT_REPOSITORY, '')
         credentialsParam('GIT_CREDENTIALS') {
           defaultValue(GIT_CREDENTIALS)
         }
-      	booleanParam('GIT_UPDATE_SUBMODULES', (GIT_UPDATE_SUBMODULES == 'true'), '')
+        booleanParam('GIT_UPDATE_SUBMODULES', (GIT_UPDATE_SUBMODULES == 'true'), '')
         stringParam('GRADLE_TASK', GRADLE_TASK, '')
-      	booleanParam('IS_PR_BUILD', true, '')
+        booleanParam('IS_PR_BUILD', true, '')
     }
   
     properties {
         githubProjectProperty {
-          	projectUrlStr(GIT_REPOSITORY)
+            projectUrlStr(GIT_REPOSITORY)
         }
     }
 
     triggers {
         githubPullRequests {
-          	triggerMode("CRON")
-          	spec("*/5 * * * *")
-          	preStatus(true)
-          	cancelQueued(false)
-          	abortRunning(false)
-          	skipFirstRun(false)
-          	events {
-              	Open()
-              	nonMergeable {
-					skip(true)
-				}
+            triggerMode("CRON")
+            spec("*/5 * * * *")
+            preStatus(true)
+            cancelQueued(false)
+            abortRunning(false)
+            skipFirstRun(false)
+            events {
+                Open()
+                nonMergeable {
+          skip(true)
+        }
             }
             repoProviders {
               githubPlugin {

@@ -9,11 +9,11 @@ def AGENT_NODE = nodeParameterMap[BUILD_STACK]
 def jobPrefix = "$SOLUTION_NAME" + "/" + "$SOLUTION_NAME"
 
 def jobDashboard = "$SOLUTION_NAME" + "/" + "Dashboard"
-def jobDevPR = "1_" + jobPrefix + "_DevPR"
-def jobBuild = "2_" + jobPrefix + "_Build"
-def jobDeployment = "3A_" + jobPrefix + "_QA"
-def jobPromotion = "3B_" + jobPrefix + "_QA_Promotion"
-def jobPublishing = "4_" + jobPrefix + "_Publish"
+def jobDevPR = "$SOLUTION_NAME" + "/" + "1_DevPR"
+def jobBuild = "$SOLUTION_NAME" + "/" + "2_Build"
+def jobDeployment = "$SOLUTION_NAME" + "/" + "3A_QA"
+def jobPromotion = "$SOLUTION_NAME" + "/" + "3B_QA_Promotion"
+def jobPublishing = "$SOLUTION_NAME" + "/" + "4_Publish"
 
 
 folder("$SOLUTION_NAME") {
@@ -53,36 +53,54 @@ freeStyleJob(jobPromotion) {
     parameters {
         stringParam('SOURCE_PROJECT', '', '')
         stringParam('SOURCE_BUILD_NUMBER', '', '')
+        stringParam('PROMOTION_RECEIPIENTS', PROMOTION_RECEIPIENTS, '')
     }
 
     properties{
-    promotions{
-      promotion {
-            name('Deploy to Apple')
-            icon('star-gold')
-            conditions {
-                manual('')
-            }
-          
-            actions {
-                downstreamParameterized {
-                    trigger(jobPublishing) {
-                        parameters {
-                            predefinedProp("SOURCE_PROJECT", '$SOURCE_PROJECT')
-                            predefinedProp("SOURCE_BUILD_NUMBER", '$SOURCE_BUILD_NUMBER')
+        promotions{
+            promotion {
+                name('Deploy to Apple')
+                icon('star-gold')
+                conditions {
+                    manual('')
+                }
+              
+                actions {
+                    downstreamParameterized {
+                        trigger(jobPublishing) {
+                            parameters {
+                                predefinedProp("SOURCE_PROJECT", '$SOURCE_PROJECT')
+                                predefinedProp("SOURCE_BUILD_NUMBER", '$SOURCE_BUILD_NUMBER')
+                            }
                         }
                     }
                 }
             }
         }
     }
-  }
   
     steps {
         shell('echo "INFORM ABOUT NEW BUILD - awaiting promotion!"')
         shell('echo "SEND EMAIL"')
         shell('echo "CREATE JIRA ISSUE"')
     }  
+  
+    publishers {
+        extendedEmail {
+            recipientList("$PROMOTION_RECEIPIENTS")
+            defaultSubject('Request for Promotion of ' + "$SOLUTION_NAME")
+            defaultContent('A build #${SOURCE_BUILD_NUMBER} of project <b>' + "$SOLUTION_NAME" + '</b> was successful and a new version was created.<br><br>Check $BUILD_URL and promote version to be uploaded to the Store.')
+            contentType('text/html')
+            triggers {
+                beforeBuild()
+                always {
+                    sendTo {
+                        recipientList()
+                    }
+                }
+            }
+        }
+    }
 }
 
 // create Publish Job
@@ -140,13 +158,17 @@ freeStyleJob(jobDeployment) {
   // Base Init of Apperian Publishing
     configure { project ->
         project / publishers << 'org.jenkinsci.plugins.ease.EaseRecorder' {
-            
+            uploads {
+                'org.jenkinsci.plugins.ease.EaseUpload' {
+                    versionNotes('Build #$SOURCE_BUILD_NUMBER at $BUILD_TIMESTAMP')
+                }
+            }
         }
     }
 }
 
 // create Build Job
-pipelineJob(jobPrefix + "_Build") {
+pipelineJob(jobBuild) {
     parameters {
         stringParam('AGENT_NODE', AGENT_NODE, '')
         booleanParam('SKIP_CHECKOUT', (SKIP_CHECKOUT == 'true'), '')
