@@ -90,7 +90,7 @@ freeStyleJob(jobPromotion) {
         extendedEmail {
             recipientList("$EMAIL_RECEIPIENTS")
             defaultSubject('Request for Promotion of ' + "$SOLUTION_NAME")
-            defaultContent('The build $SOURCE_BUILD_NUMBER was successful.<br>Check <a href="' + $BUILD_URL + '" and promote build to be uploaded to the Store.')
+            defaultContent('The build $SOURCE_BUILD_NUMBER was successful.<br>Check <a href="$BUILD_URL" and promote build to be uploaded to the Store.')
             contentType('text/html')
             triggers {
                 beforeBuild()
