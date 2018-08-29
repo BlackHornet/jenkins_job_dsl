@@ -155,7 +155,11 @@ freeStyleJob(jobDeployment) {
 	// Base Init of Apperian Publishing
     configure { project ->
         project / publishers << 'org.jenkinsci.plugins.ease.EaseRecorder' {
-            versionNotes('Build #$SOURCE_BUILD_NUMBER at $BUILD_TIMESTAMP')
+            uploads {
+                org.jenkinsci.plugins.ease.EaseUpload {
+                    versionNotes('Build #$SOURCE_BUILD_NUMBER at $BUILD_TIMESTAMP')
+                }
+            }
         }
     }
 }
