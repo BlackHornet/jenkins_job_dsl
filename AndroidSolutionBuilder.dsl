@@ -54,36 +54,54 @@ freeStyleJob(jobPromotion) {
     parameters {
         stringParam('SOURCE_PROJECT', '', '')
       	stringParam('SOURCE_BUILD_NUMBER', '', '')
+        stringParam('EMAIL_RECEIPIENTS', '', '')
     }
 
   	properties{
-		promotions{
-			promotion {
+		    promotions{
+			      promotion {
                 name('Deploy to Google')
                 icon('star-gold')
                 conditions {
-                  	manual('')
+                    manual('')
                 }
               
                 actions {
-					downstreamParameterized {
-                    	trigger(jobPublishing) {
-                          parameters {
-							predefinedProp("SOURCE_PROJECT", '$SOURCE_PROJECT')
-							predefinedProp("SOURCE_BUILD_NUMBER", '$SOURCE_BUILD_NUMBER')
-                          }
-                    	}
-                  	}
+                    downstreamParameterized {
+                        trigger(jobPublishing) {
+                            parameters {
+                                predefinedProp("SOURCE_PROJECT", '$SOURCE_PROJECT')
+                                predefinedProp("SOURCE_BUILD_NUMBER", '$SOURCE_BUILD_NUMBER')
+                            }
+                        }
+                    }
                 }
             }
-		}
-	}
+		    }
+	  }
   
     steps {
       	shell('echo "INFORM ABOUT NEW BUILD - awaiting promotion!"')
         shell('echo "SEND EMAIL"')
         shell('echo "CREATE JIRA ISSUE"')
     }  
+  
+    publishers {
+        extendedEmail {
+            recipientList("$EMAIL_RECEIPIENTS")
+            defaultSubject('Request for Promotion of ' + "$SOLUTION_NAME")
+            defaultContent('The build ' + "$SOURCE_BUILD_NUMBER" + ' was successful.<br>Check <a href="' + $BUILD_URL + '" and promote build to be uploaded to the Store.')
+            contentType('text/html')
+            triggers {
+                beforeBuild()
+                always {
+                    sendTo {
+                        recipientList()
+                    }
+                }
+            }
+        }
+    }
 }
 
 // create Publish Job
@@ -106,7 +124,7 @@ freeStyleJob(jobPublishing) {
         }
     }
   
-	publishers {
+    publishers {
     	androidApkUpload {
           	apkFilesPattern("**/*.apk")
             deobfuscationFilesPattern("**/mapping.txt")
