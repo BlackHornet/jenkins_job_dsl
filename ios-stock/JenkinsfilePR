@@ -28,6 +28,19 @@ pipeline {
             }
         }
         
+        stage('Prepare Certificates & Provisioning') {
+            agent {
+                label "$AGENT_NODE"
+            }
+            
+            steps {
+                importDeveloperProfile importIntoExistingKeychain: true, 
+                    keychainName: "$KEYCHAIN_NAME", 
+                    keychainPath: "", keychainPwd: "", 
+                    profileId: "$DEVELOPER_PROFILE"
+            }
+        }
+        
         stage('Build Project Pull Request') {
             agent {
                 label "$AGENT_NODE"

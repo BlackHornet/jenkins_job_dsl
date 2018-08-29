@@ -201,6 +201,9 @@ pipelineJob(jobBuild) {
         stringParam('KEYCHAIN_NAME', KEYCHAIN_NAME, '')
         stringParam('PROVISIONING_PROFILE_APPID', PROVISIONING_PROFILE_APPID, '')
         stringParam('PROVISIONING_PROFILE_UUID', PROVISIONING_PROFILE_UUID, '')
+        credentialsParam('DEVELOPER_PROFILE') {
+          defaultValue(DEVELOPER_PROFILE)
+        }
     }
   
     properties {
