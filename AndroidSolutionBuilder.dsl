@@ -1,5 +1,6 @@
 // this map need to me matching the BUILD_STACK choice parameter options
 def nodeParameterMap=[:]
+nodeParameterMap.put('Docker on Ubuntu 16.04 - LTS Stack','adocker')
 nodeParameterMap.put('Android on Ubuntu 16.04 - LTS Stack','aci-ssd')
 
 def AGENT_NODE = nodeParameterMap[BUILD_STACK]
@@ -173,8 +174,12 @@ pipelineJob(jobPrefix + "_Build") {
 
     definition {
         cps {
-            script(readFileFromWorkspace('android-stock/Jenkinsfile'))
-            sandbox()
+            if (AGENT_NODE == 'aci-ssh') {
+                script(readFileFromWorkspace('android-stock/Jenkinsfile'))
+            } else {
+                script(readFileFromWorkspace('android-docker/Jenkinsfile'))
+                sandbox()
+            }
         }
     }
 }
@@ -229,8 +234,12 @@ pipelineJob(jobDevPR) {
   
     definition {
         cps {
-            script(readFileFromWorkspace('android-stock/JenkinsfilePR'))
-            sandbox()
+            if (AGENT_NODE == 'aci-ssh') {
+                script(readFileFromWorkspace('android-stock/JenkinsfilePR'))
+            } else {
+                script(readFileFromWorkspace('android-docker/JenkinsfilePR'))
+                sandbox()
+            }
         }
     }
 }

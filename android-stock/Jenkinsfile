@@ -33,8 +33,14 @@ pipeline {
             steps {
                 echo "Perform Build"
                 sh "./gradlew $GRADLE_TASK"
-                archiveArtifacts artifacts: "$ARCHIVE_INCLUDE", excludes: "$ARCHIVE_EXCLUDE", fingerprint: true, onlyIfSuccessful: false
-
+            }
+            
+            post {
+                success {
+                    script {
+                        archiveArtifacts artifacts: "$ARCHIVE_INCLUDE", excludes: "$ARCHIVE_EXCLUDE", fingerprint: true
+                    }
+                }
             }
         }
         
