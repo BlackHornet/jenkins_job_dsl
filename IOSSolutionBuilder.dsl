@@ -182,6 +182,37 @@ pipelineJob(jobBuild) {
             // Comma-separated list of projects that can copy artifacts of this project.
             projectNames("$SOLUTION_NAME" + ".*")
         }
+
+        githubProjectProperty {
+            // Enter the URL for the GitHub hosted project (without the tree/master or tree/branch part).
+            projectUrlStr("$GIT_REPOSITORY")
+        }
+    }
+
+    triggers {
+        githubBranches {
+            triggerMode("CRON")
+            spec("*/5 * * * *")
+            cancelQueued(false)
+            abortRunning(false)
+            skipFirstRun(false)
+            events {
+                hashChanged()
+                restriction {
+                    matchCriteriaStr('master')
+                }
+            }
+            repoProviders {
+                githubPlugin {
+                    // Old trigger behaviour when connection resolved first from global settings and then used locally.
+                    cacheConnection(true)
+                    // Allow disable registering hooks even if it specified in global settings.
+                    manageHooks(true)
+                    // ADMIN, PUSH or PULL repository permission required for choosing connection from `GitHub Plugin` `GitHub Server Configs`.
+                    repoPermission("ADMIN")
+                }
+            }
+        }
     }
 
     definition {
