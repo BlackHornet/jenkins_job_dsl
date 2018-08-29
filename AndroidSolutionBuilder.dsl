@@ -90,7 +90,7 @@ freeStyleJob(jobPromotion) {
         extendedEmail {
             recipientList("$PROMOTION_RECEIPIENTS")
             defaultSubject('Request for Promotion of ' + "$SOLUTION_NAME")
-            defaultContent('The build <b>' + "$SOLUTION_NAME" + '</b> #${SOURCE_BUILD_NUMBER} was successful.<br><br>Check $BUILD_URL and promote build to be uploaded to the Store.')
+            defaultContent('A build #${SOURCE_BUILD_NUMBER} of project <b>' + "$SOLUTION_NAME" + '</b> was successful and a new version was created.<br><br>Check $BUILD_URL and promote version to be uploaded to the Store.')
             contentType('text/html')
             triggers {
                 beforeBuild()
@@ -155,7 +155,7 @@ freeStyleJob(jobDeployment) {
 	// Base Init of Apperian Publishing
     configure { project ->
         project / publishers << 'org.jenkinsci.plugins.ease.EaseRecorder' {
-            
+            versionNotes << 'Build #$SOURCE_BUILD_NUMBER at $BUILD_TIMESTAMP'
         }
     }
 }
