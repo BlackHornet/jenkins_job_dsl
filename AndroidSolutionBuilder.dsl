@@ -63,11 +63,7 @@ freeStyleJob(jobPromotion) {
                 name('Deploy to Google')
                 icon('star-gold')
                 conditions {
-                    manual('') {
-                        parameters{
-                            booleanParam("", false, "Before approval check the configuration of the 4_Publish job")
-                        }
-                    }
+                    manual('')
                     downstream(false, '$SOURCE_PROJECT')
                 }
               
