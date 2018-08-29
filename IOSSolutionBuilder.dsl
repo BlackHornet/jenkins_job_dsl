@@ -62,7 +62,11 @@ freeStyleJob(jobPromotion) {
                 name('Deploy to Apple')
                 icon('star-gold')
                 conditions {
-                    manual('')
+                    manual('') {
+                        parameters{
+                            booleanParam("", "", "Before approval check the configuration of the 4_Publish job")
+                        }
+                    }
                     downstream(false, '$SOURCE_PROJECT')
                 }
               
