@@ -10,11 +10,11 @@ def AGENT_NODE = nodeParameterMap[BUILD_STACK]
 def jobPrefix = "$SOLUTION_NAME" + "/" + "$SOLUTION_NAME"
 
 def jobDashboard = "$SOLUTION_NAME" + "/" + "Dashboard"
-def jobDevPR = "$SOLUTION_NAME" + "/" + "$SOLUTION_NAME" + "_1_DevPR"
-def jobBuild = "$SOLUTION_NAME" + "/" + "$SOLUTION_NAME" + "_2_Build"
-def jobDeployment = "$SOLUTION_NAME" + "/" + "$SOLUTION_NAME" + "_3A_QA"
-def jobPromotion = "$SOLUTION_NAME" + "/" + "$SOLUTION_NAME" + "_3B_QA_Promotion"
-def jobPublishing = "$SOLUTION_NAME" + "/" + "$SOLUTION_NAME" + "_4_Publish"
+def jobDevPR = "$SOLUTION_NAME" + "/" + "1_DevPR"
+def jobBuild = "$SOLUTION_NAME" + "/" + "2_Build"
+def jobDeployment = "$SOLUTION_NAME" + "/" + "3A_QA"
+def jobPromotion = "$SOLUTION_NAME" + "/" + "3B_QA_Promotion"
+def jobPublishing = "$SOLUTION_NAME" + "/" + "4_Publish"
 
 
 folder("$SOLUTION_NAME") {
@@ -143,7 +143,7 @@ freeStyleJob(jobDeployment) {
 }
 
 // create Build Job
-pipelineJob(jobPrefix + "_Build") {
+pipelineJob(jobBuild) {
   	parameters {
         stringParam('AGENT_NODE', AGENT_NODE, '')
       	stringParam('DOCKER_IMAGE', DOCKER_IMAGE, '')
