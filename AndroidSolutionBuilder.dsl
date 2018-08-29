@@ -54,7 +54,7 @@ freeStyleJob(jobPromotion) {
     parameters {
         stringParam('SOURCE_PROJECT', '', '')
       	stringParam('SOURCE_BUILD_NUMBER', '', '')
-        stringParam('EMAIL_RECEIPIENTS', '', '')
+        stringParam('EMAIL_RECEIPIENTS', EMAIL_RECEIPIENTS, '')
     }
 
   	properties{
@@ -89,8 +89,8 @@ freeStyleJob(jobPromotion) {
     publishers {
         extendedEmail {
             recipientList("$EMAIL_RECEIPIENTS")
-            defaultSubject('Request for Promotion of ' + "$SOLUTION_NAME")
-            defaultContent('The build $SOURCE_BUILD_NUMBER was successful.<br>Check <a href="$BUILD_URL" and promote build to be uploaded to the Store.')
+            defaultSubject('Request for Promotion of ${SOLUTION_NAME}')
+            defaultContent('The build ${SOLUTION_NAME} #${SOURCE_BUILD_NUMBER} was successful.<br><br>Check $BUILD_URLpromotion/ and promote build to be uploaded to the Store.')
             contentType('text/html')
             triggers {
                 beforeBuild()
