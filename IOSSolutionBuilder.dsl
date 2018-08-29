@@ -64,7 +64,7 @@ freeStyleJob(jobPromotion) {
                 conditions {
                     manual('') {
                         parameters{
-                            booleanParam("", "", "Before approval check the configuration of the 4_Publish job")
+                            booleanParam("", false, "Before approval check the configuration of the 4_Publish job")
                         }
                     }
                     downstream(false, '$SOURCE_PROJECT')
