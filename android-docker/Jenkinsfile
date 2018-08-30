@@ -43,15 +43,6 @@ pipeline {
             steps {
                 echo "Perform Build"
                 sh "./gradlew $GRADLE_TASK"
-
-                if ("$KEYSTORE_CREDENTIALS"?.trim()) {
-                    signAndroidApks (
-                        keyStoreId: "$KEYSTORE_CREDENTIALS",
-                        keyAlias: "$KEYSTORE_ALIAS",
-                        apksToSign: "**/*-unsigned.apk",
-                        androidHome: "/opt/android-sdk"
-                    )
-                }
             }
             
             post {

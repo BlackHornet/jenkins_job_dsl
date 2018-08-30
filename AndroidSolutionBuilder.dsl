@@ -204,10 +204,6 @@ pipelineJob(jobBuild) {
         stringParam('DEPLOYMENT_JOB', jobDeployment, '')
         stringParam('PROMOTION_JOB', jobPromotion, '')
         booleanParam('IS_PR_BUILD', false, '')
-        credentialsParam('KEYSTORE_CREDENTIALS') {
-          defaultValue(KEYSTORE_CREDENTIALS)
-        }
-        stringParam('KEYSTORE_ALIAS', KEYSTORE_ALIAS, '')
     }
   
     properties {
