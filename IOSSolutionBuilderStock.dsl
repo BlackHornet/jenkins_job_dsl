@@ -163,8 +163,8 @@ freeStyleJob(jobDeployment) {
 
     steps {
         copyArtifacts('$SOURCE_PROJECT') {
+            targetDirectory('$SOURCE_PROJECT')
             flatten()
-            targetDirectory('$SOURCE_BUILD_NUMBER')
             fingerprintArtifacts(true)
             buildSelector {
                 buildNumber('$SOURCE_BUILD_NUMBER')
