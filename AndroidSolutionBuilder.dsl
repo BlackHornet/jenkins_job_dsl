@@ -132,10 +132,14 @@ freeStyleJob(jobPublishing) {
     }
   
     publishers {
-      androidApkUpload {
-            apkFilesPattern("**/*.apk")
+        androidApkUpload {
+            apkFilesPattern("**/*release.apk")
             deobfuscationFilesPattern("**/mapping.txt")
             googleCredentialsId("$GOOGLE_SERVICE_ACCOUNT")
+        }
+
+        wsCleanup {
+            deleteDirectories(true)
         }
     }
 }

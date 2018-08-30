@@ -141,6 +141,12 @@ freeStyleJob(jobPublishing) {
         }
         shell('"/Applications/Xcode.app/Contents/Applications/Application Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Support/altool" --validate-app -f "$WORKSPACE/$SOURCE_BUILD_NUMBER/Application.ipa" -u $ITUNES_USERNAME -p $ITUNES_PASSWORD')
     }
+  
+    publishers {
+        wsCleanup {
+            deleteDirectories(true)
+        }
+    }
 }
 
 // create QA Job
@@ -152,7 +158,7 @@ freeStyleJob(jobDeployment) {
             usernamePassword('ACCOUNT_USERNAME', 'ACCOUNT_PASSWORD', '${DEPLOYMENT_ACCOUNT}')
         }
     }
-    
+
     parameters {
         stringParam('SOURCE_PROJECT', '', '')
         stringParam('SOURCE_BUILD_NUMBER', '', '')
