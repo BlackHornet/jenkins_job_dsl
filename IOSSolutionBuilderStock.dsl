@@ -146,9 +146,19 @@ freeStyleJob(jobPublishing) {
 // create QA Job
 freeStyleJob(jobDeployment) {
     description("<h2>Be aware to configure the Post-build Action: Apperian EASE Plugin Step</h2>")
+
+    wrappers {
+        credentialsBinding {
+            usernamePassword('ACCOUNT_USERNAME', 'ACCOUNT_PASSWORD', '${DEPLOYMENT_ACCOUNT}')
+        }
+    }
+    
     parameters {
         stringParam('SOURCE_PROJECT', '', '')
         stringParam('SOURCE_BUILD_NUMBER', '', '')
+        credentialsParam('DEPLOYMENT_ACCOUNT') {
+          defaultValue(QA_DEPLOYMENT_ACCOUNT)
+        }
     }
 
     steps {
@@ -167,7 +177,10 @@ freeStyleJob(jobDeployment) {
         project / publishers << 'org.jenkinsci.plugins.ease.EaseRecorder' {
             uploads {
                 'org.jenkinsci.plugins.ease.EaseUpload' {
-                    versionNotes('Build #$SOURCE_BUILD_NUMBER at $BUILD_TIMESTAMP')
+                    prodEnv('EUROPE')
+                    username('$ACCOUNT_USERNAME')
+                    password('$ACCOUNT_PASSWORD')
+                    versionNotes('Automated build #$SOURCE_BUILD_NUMBER created at $BUILD_TIMESTAMP')
                 }
             }
         }
