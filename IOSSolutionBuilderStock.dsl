@@ -218,6 +218,9 @@ pipelineJob(jobBuild) {
         stringParam('DEVELOPMENT_TEAMID', DEVELOPMENT_TEAMID, '')
         stringParam('IPA_EXPORT_METHOD', IPA_EXPORT_METHOD, '')
         stringParam('KEYCHAIN_NAME', KEYCHAIN_NAME, '')
+        credentialsParam('KEYCHAIN_PASSWORD_CREDENTIALS') {
+          defaultValue(KEYCHAIN_PASSWORD_CREDENTIALS)
+        }
         stringParam('PROVISIONING_PROFILE_APPID', PROVISIONING_PROFILE_APPID, '')
         stringParam('PROVISIONING_PROFILE_UUID', PROVISIONING_PROFILE_UUID, '')
         credentialsParam('DEVELOPER_PROFILE') {
@@ -289,6 +292,9 @@ pipelineJob(jobDevPR) {
         stringParam('XCODE_TARGET', XCODE_TARGET, '')
         stringParam('DEVELOPMENT_TEAMID', DEVELOPMENT_TEAMID, '')
         stringParam('KEYCHAIN_NAME', KEYCHAIN_NAME, '')
+        credentialsParam('KEYCHAIN_PASSWORD_CREDENTIALS') {
+          defaultValue(KEYCHAIN_PASSWORD_CREDENTIALS)
+        }
         stringParam('PROVISIONING_PROFILE_APPID', PROVISIONING_PROFILE_APPID, '')
         stringParam('PROVISIONING_PROFILE_UUID', PROVISIONING_PROFILE_UUID, '')
     }

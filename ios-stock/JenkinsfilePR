@@ -38,6 +38,10 @@ pipeline {
                     keychainName: "$KEYCHAIN_NAME", 
                     keychainPath: "", keychainPwd: "", 
                     profileId: "$DEVELOPER_PROFILE"
+
+                withCredentials([string(credentialsId: "$KEYCHAIN_PASSWORD_CREDENTIALS", variable: 'KEYCHAIN_PASSWORD')]) {
+                    sh "security set-key-partition-list -S apple-tool:,apple: -s -k ${KEYCHAIN_PASSWORD} ${KEYCHAIN_PATH}"
+                }
             }
         }
         
