@@ -170,6 +170,7 @@ freeStyleJob(jobDeployment) {
     steps {
         copyArtifacts('$SOURCE_PROJECT') {
             targetDirectory('$SOURCE_PROJECT')
+            includePatterns('**/*.ipa')
             flatten()
             fingerprintArtifacts(true)
             buildSelector {
@@ -191,13 +192,18 @@ freeStyleJob(jobDeployment) {
             }
         }
     }
+  
+    publishers {
+        wsCleanup {
+            deleteDirectories(true)
+        }
+    }
 }
 
 // create Build Job
 pipelineJob(jobBuild) {
     parameters {
         stringParam('AGENT_NODE', AGENT_NODE, '')
-        booleanParam('SKIP_CHECKOUT', (SKIP_CHECKOUT == 'true'), '')
         stringParam('GIT_REPOSITORY', GIT_REPOSITORY, '')
         credentialsParam('GIT_CREDENTIALS') {
           defaultValue(GIT_CREDENTIALS)

@@ -193,7 +193,6 @@ pipelineJob(jobBuild) {
     parameters {
         stringParam('AGENT_NODE', AGENT_NODE, '')
         stringParam('DOCKER_IMAGE', DOCKER_IMAGE, '')
-        booleanParam('SKIP_CHECKOUT', (SKIP_CHECKOUT == 'true'), '')
         stringParam('GIT_REPOSITORY', GIT_REPOSITORY, '')
         credentialsParam('GIT_CREDENTIALS') {
           defaultValue(GIT_CREDENTIALS)
