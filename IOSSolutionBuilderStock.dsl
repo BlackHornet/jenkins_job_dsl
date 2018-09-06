@@ -140,8 +140,10 @@ freeStyleJob(jobPublishing) {
             }
         }
         shell("""
-xcode_contents=`xcode-select -p`
-echo $xcode_contents
+"/Applications/Xcode.app/Contents/Applications/Application Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Support/altool" --validate-app -f "$WORKSPACE/$SOURCE_BUILD_NUMBER/Application.ipa" -u $ITUNES_USERNAME -p $ITUNES_PASSWORD --output-format xml
+if [ "\$?" -eq 0 ]; then
+    "/Applications/Xcode.app/Contents/Applications/Application Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Support/altool" --upload-app -f "$WORKSPACE/$SOURCE_BUILD_NUMBER/Application.ipa" -u $ITUNES_USERNAME -p $ITUNES_PASSWORD --output-format xml
+fi
 """)
     }
   
