@@ -141,7 +141,7 @@ freeStyleJob(jobPublishing) {
         }
         shell(""" \
 xcode_contents=`xcode-select -p` \
-cd "${xcode_contents}/../Applications/Application Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Support/" \
+cd "\${xcode_contents}/../Applications/Application Loader.app/Contents/Frameworks/ITunesSoftwareService.framework/Support/" \
 ./altool --validate-app -f "$WORKSPACE/$SOURCE_BUILD_NUMBER/Application.ipa" -u $ITUNES_USERNAME -p $ITUNES_PASSWORD --output-format xml \
 if [ \$? -eq 0 ]; then \
     ./altool --upload-app -f "$WORKSPACE/$SOURCE_BUILD_NUMBER/Application.ipa" -u $ITUNES_USERNAME -p $ITUNES_PASSWORD --output-format xml \
